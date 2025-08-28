@@ -16,10 +16,7 @@ corpus = [doc['question'] + " " + doc['answer'] for doc in documents]
 
 #Embedding Model
 @st.cache_resource
-def load_embedder():
-    return SentenceTransformer('all-MiniLM-L6-v2')
-
-embedder = load_embedder()
+embedder = SentenceTransformer('all-MiniLM-L6-v2')
 corpus_embeddings = embedder.encode(corpus, convert_to_tensor=False)
 
 #FAISS Indexing
@@ -71,3 +68,4 @@ if st.button("Get Answer"):
     else:
 
         st.warning("Please enter a valid question before submitting.")
+
