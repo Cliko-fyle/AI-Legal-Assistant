@@ -32,9 +32,9 @@ def load_qa_model():
     model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
     return pipeline(
         "text2text-generation",
-        model=model,
-        tokenizer=tokenizer,
-        device=0 if torch.cuda.is_available() else -1
+        model = model,
+        tokenizer = tokenizer,
+        device = 0 if torch.cuda.is_available() else -1
     )
 
 qa_model = load_qa_model()
@@ -68,4 +68,5 @@ if st.button("Get Answer"):
     else:
 
         st.warning("Please enter a valid question before submitting.")
+
 
