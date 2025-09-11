@@ -3,11 +3,10 @@ import torch
 import numpy as np
 import faiss
 import streamlit as st
+from openai import OpenAI
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
-from langchain_groq import ChatGroq
 
-GROQ_API_KEY = st.secrets["groq_api_key"]
 #Loading Datasets
 with open('ipc_qa.json') as f1, open('crpc_qa.json') as f2:
     ipc_data = json.load(f1)
@@ -33,7 +32,7 @@ embedder, index = faiss_indexing(corpus)
 def call_llama(prompt):
     client = OpenAI(
         base_url="https://api.groq.com/openai/v1",
-        api_key = GROQ_API_KEY,
+        api_key = st.secrets["groq_api_key"],
         )
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
@@ -80,6 +79,7 @@ if st.button("Get Answer"):
     else:
 
         st.warning("Please enter a valid question before submitting.")
+
 
 
 
