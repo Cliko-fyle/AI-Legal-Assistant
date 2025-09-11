@@ -30,13 +30,17 @@ embedder, index = faiss_indexing(corpus)
 
 # Q&A Model function
 @st.cache_resource
-def load_llama3_model():
-    return ChatGroq(
+def call_llama(prompt):
+    client = OpenAI(
+        base_url="https://api.groq.com/openai/v1",
         api_key = GROQ_API_KEY,
-        model = "llama-3.1-8b-instant"
-    )
-
-qa_model = load_llama3_model()
+        )
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[{"role": "user","content": prompt}],
+        max_tokens = 200,
+        )
+    return response.choices[0].message.content
 
 #Function for retrieval
 def retrieve(query, k=3):
@@ -57,10 +61,8 @@ def generate_answer(query):
         f"Question: {query}\n"
         f"Answer:"
     )
-    
-    messages = [{"role": "user", "content": prompt}]
 
-    response = qa_model(messages)
+    response = call_llama(prompt)
     return response.strip()
 
 #App deployment using STREAMLIT
@@ -78,5 +80,6 @@ if st.button("Get Answer"):
     else:
 
         st.warning("Please enter a valid question before submitting.")
+
 
 
