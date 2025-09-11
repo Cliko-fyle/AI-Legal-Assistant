@@ -5,7 +5,9 @@ import faiss
 import streamlit as st
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, pipeline
+from langchain_groq import ChatGroq
 
+GROQ_API_KEY = st.secrets["groq_api_key"]
 #Loading Datasets
 with open('ipc_qa.json') as f1, open('crpc_qa.json') as f2:
     ipc_data = json.load(f1)
@@ -28,17 +30,13 @@ embedder, index = faiss_indexing(corpus)
 
 # Q&A Model function
 @st.cache_resource
-def load_qa_model():
-    model_name = "Google/flan-t5-base"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-    return pipeline(
-        "text2text-generation",
-        model = model,
-        tokenizer = tokenizer,
+def load_llama3_model():
+    return ChatGroq(
+        api_key = GROQ_API_KEY,
+        model = "llama3-70b-8192"
     )
 
-qa_model = load_qa_model()
+qa_model = load_llama3_model()
 
 #Function for retrieval
 def retrieve(query, k=3):
@@ -59,7 +57,7 @@ def generate_answer(query):
         f"Question: {query}\n"
         f"Answer:"
     )
-    response = qa_model(prompt, max_new_tokens=200, temperature=0.3)[0]['generated_text']
+    response = qa_model.chat(prompt)
     return response.strip()
 
 #App deployment using STREAMLIT
@@ -77,21 +75,3 @@ if st.button("Get Answer"):
     else:
 
         st.warning("Please enter a valid question before submitting.")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
