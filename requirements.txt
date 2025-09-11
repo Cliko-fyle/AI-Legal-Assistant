@@ -5,3 +5,4 @@ transformers
 accelerate
 sentence-transformers
 langchain_groq
+openai
