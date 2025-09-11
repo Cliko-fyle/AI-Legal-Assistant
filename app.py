@@ -51,15 +51,15 @@ def generate_answer(query):
     retrieved_docs = retrieve(query)
     context = "\n".join(retrieved_docs)
     prompt = (
-        f"You are a legal assistant. "
-        f"Answer the question in a clear and informative way, using only the context provided. "
-        f"Keep the answer relevant and limited to the legal documents. "
-        f"If the answer is not present in the context, say 'The information is not available in the provided documents.'\n\n"
+        f"You are a knowledgeable legal assistant. "
+        f"Answer the question in a clear and informative manner, using only the context provided. "
+        f"Explain briefly with reasoning or details when possible, but stay relevant. "
+        f"If the answer is not in the context, say 'The information is not available in the provided documents.'\n\n"
         f"Context:\n{context}\n\n"
         f"Question: {query}\n"
         f"Answer:"
     )
-    response = qa_model(prompt, max_new_tokens=200, temperature=0.5)[0]['generated_text']
+    response = qa_model(prompt, max_new_tokens=200, temperature=0.5, top_p=0.9)[0]['generated_text']
     return response.strip()
 
 #App deployment using STREAMLIT
@@ -77,6 +77,7 @@ if st.button("Get Answer"):
     else:
 
         st.warning("Please enter a valid question before submitting.")
+
 
 
 
