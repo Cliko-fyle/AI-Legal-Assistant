@@ -4,7 +4,7 @@ import numpy as np
 import faiss
 import streamlit as st
 from sentence_transformers import SentenceTransformer
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline
+from transformers import AutoTokenizer, AutoModelForSeq2Seq, pipeline
 
 #Loading Datasets
 with open('ipc_qa.json') as f1, open('crpc_qa.json') as f2:
@@ -29,11 +29,11 @@ embedder, index = faiss_indexing(corpus)
 # Q&A Model function
 @st.cache_resource
 def load_qa_model():
-    model_name = "EleutherAI/gpt-neo-1.3B"
+    model_name = "Google/flan-t5-base"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
+    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
     return pipeline(
-        "text-generation",
+        "text2text-generation",
         model = model,
         tokenizer = tokenizer,
     )
@@ -77,6 +77,7 @@ if st.button("Get Answer"):
     else:
 
         st.warning("Please enter a valid question before submitting.")
+
 
 
 
