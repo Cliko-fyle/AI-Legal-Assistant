@@ -29,7 +29,7 @@ embedder, index = faiss_indexing(corpus)
 # Q&A Model function
 @st.cache_resource
 def load_qa_model():
-    model_name = "google/flan-t5-base"
+    model_name = "google/flan-t5-large"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
     return pipeline(
@@ -77,6 +77,7 @@ if st.button("Get Answer"):
     else:
 
         st.warning("Please enter a valid question before submitting.")
+
 
 
 
