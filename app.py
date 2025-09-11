@@ -53,7 +53,7 @@ def generate_answer(query):
     prompt = (
         f"You are a knowledgeable legal assistant. "
         f"Answer the question in a clear and informative manner, using only the context provided. "
-        f"Provide a brief explanation that adds useful details while staying relevant. "
+        f"Explain briefly with reasoning or details when possible, but stay relevant. "
         f"If the answer is not in the context, say 'The information is not available in the provided documents.'\n\n"
         f"Context:\n{context}\n\n"
         f"Question: {query}\n"
@@ -77,6 +77,7 @@ if st.button("Get Answer"):
     else:
 
         st.warning("Please enter a valid question before submitting.")
+
 
 
 
