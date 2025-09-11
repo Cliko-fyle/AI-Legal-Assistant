@@ -14,18 +14,17 @@ with open('ipc_qa.json') as f1, open('crpc_qa.json') as f2:
 documents = ipc_data + crpc_data
 corpus = [doc['question'] + " " + doc['answer'] for doc in documents]
 
-#Embedding Model
-@st.cache_resource
-def load_embedder():
-    return SentenceTransformer('all-MiniLM-L6-v2')
-
-embedder = load_embedder()
-corpus_embeddings = embedder.encode(corpus, convert_to_tensor=False)
 
 #FAISS Indexing
-dimension = len(corpus_embeddings[0])
-index = faiss.IndexFlatL2(dimension)
-index.add(np.array(corpus_embeddings))
+@st.cache_resource
+def faiss_indexing(corpus):
+    embedder = SentenceTransformer('all-MiniLM-L6-v2')
+    corpus_embeddings = embedder.encode(corpus, convert_to_numpy=True, normalize_embeddings=True)
+    index = faiss.IndexFlatIP(corpus_embeddings.shape[1])
+    index.add(corpus_embeddings)
+    return embedder, index
+
+embedder, index = faiss_indexing(corpus)
 
 # Q&A Model function
 @st.cache_resource
@@ -37,23 +36,29 @@ def load_qa_model():
         "text2text-generation",
         model = model,
         tokenizer = tokenizer,
-        device = 0 if torch.cuda.is_available() else -1
     )
 
 qa_model = load_qa_model()
 
 #Function for retrieval
 def retrieve(query, k=3):
-    query_vec = embedder.encode([query])
-    distances, indices = index.search(np.array(query_vec), k)
+    query_vec = embedder.encode([query], convert_to_numpy = True, normalize_embeddings = True)
+    distances, indices = index.search(query_vec, k)
     return [corpus[i] for i in indices[0]]
 
 #Function for answer generation
 def generate_answer(query):
     retrieved_docs = retrieve(query)
     context = "\n".join(retrieved_docs)
-    prompt = f"Answer the legal question based on the context below:\n{context}\n\nQuestion: {query}"
-    response = qa_model(prompt, max_new_tokens=200)[0]['generated_text']
+    prompt = (
+        f"You are a legal assistant. "
+        f"Answer the question briefly and accurately using only the context provided. "
+        f"If the answer is not in the context, say 'The information is not available in the provided documents.'\n\n"
+        f"Context:\n{context}\n\n"
+        f"Question: {query}\n"
+        f"Answer concisely:"
+    )
+    response = qa_model(prompt, max_new_tokens=200, temperature=0.5)[0]['generated_text']
     return response.strip()
 
 #App deployment using STREAMLIT
@@ -71,6 +76,7 @@ if st.button("Get Answer"):
     else:
 
         st.warning("Please enter a valid question before submitting.")
+
 
 
 
