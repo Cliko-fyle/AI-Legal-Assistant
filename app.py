@@ -31,7 +31,7 @@ embedder, index = faiss_indexing(corpus)
 def load_qa_model():
     model_name = "EleutherAI/gpt-neo-1.3B"
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(model_name, device_map="auto")
     return pipeline(
         "text-generation",
         model = model,
@@ -77,6 +77,7 @@ if st.button("Get Answer"):
     else:
 
         st.warning("Please enter a valid question before submitting.")
+
 
 
 
